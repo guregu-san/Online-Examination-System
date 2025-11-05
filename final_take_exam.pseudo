@@ -1,0 +1,105 @@
+//U5-F1: Find Exam
+function findExam(examID) {
+    Return (SELECT * FROM exams WHERE exam_id = examID)
+}
+
+//U5-F2: Initialize Submission
+function initializeSubmission(examID, rollNumber) {
+    INSERT INTO submissions (exam_id, student_id, started_at, status)
+    VALUES (examID, rollNumber, CURRENT_TIMESTAMP, 'IN_PROGRESS')
+
+    Return (SELECT * FROM submissions
+            WHERE submission_id = LAST_INSERT_ID())
+}
+
+//U5-F3: Find Unfinished
+function findUnfinished(email) {
+    Return (SELECT * FROM submissions s JOIN exams e
+            ON s.exam_id = e.exam_id
+            WHERE s.email = email AND s.status = 'IN_PROGRESS') 
+}
+
+//U5-F4: Save Submission
+procedure saveSubmission(submissionID, answers) {
+    UPDATE submissions 
+    SET answers = answers
+    WHERE submission_id = submissionID
+}
+
+//U5-F5: Finalize Submission
+procedure finalizeSubmission(submissionID, answers) {
+    UPDATE submissions 
+    SET answers = answers, status = 'SUBMITTED'
+    WHERE submission_id = submissionID
+}
+
+//U5-F6: Automatic Grading
+procedure autoGrade(submissionID) {
+    Set submission = SELECT * FROM submissions WHERE submission_id = submissionID
+    Set examID = submission.exam_id
+
+    Set examSolutions = SELECT a.answer_id, q.points FROM answers a JOIN questions q
+                    ON a.question_id = q.question_id
+                    WHERE q.exam_id = examID AND a.is_correct = TRUE
+
+    Set score = 0
+
+    for (studentAnswer In submission.answers) do
+        for (solution In examSolutions) do
+            if (studentAnswer == solution.answer_id) do
+                Set score += solution.points
+            end
+        end
+    end
+
+    UPDATE submissions 
+    SET total_score = score, status = 'GRADED'
+    WHERE submission_id = submissionID
+}
+
+
+procedure TakeExam() {
+    if (takingExam == False) do
+        Input examID
+        Set exam = findExam(examID)
+        
+        while (exam == NULL) do
+            Output "This exam does not exist. Please try again."
+            Input examID
+            Set exam = findExam(examID)
+        end
+        
+        exam.showConditions()
+        Output "Do you accept the exam conditions?"
+        Input answer
+
+        if (answer == False) do 
+            takeToHomepage(email)
+        end
+
+        Set newSubmission = initializeSubmission(examID, rollNumber)
+        Set takingExam = True
+    end else do
+        Set newSubmission = findUnfinished(email)
+    end
+
+    while (CURRENT_TIMESTAMP - newSubmission.started_at > 0) do
+        if (saveExitSelected()) do
+            saveSubmission(newSubmission)
+            takeToHomepage(email)
+        end else if (submitSelected()) do
+            Set takingExam = False
+            Set newSubmission.finished = True
+            automGrade(newSubmission.submission_id)
+            saveSubmission(newSubmission)
+            takeToHomepage(email)
+        end   
+    end
+
+    Set takingExam = False
+    Set newSubmission.finished = True
+    newSubmission.automaticGrade()
+    saveSubmission(newSubmission)
+    takeToHomepage(email)
+}
+

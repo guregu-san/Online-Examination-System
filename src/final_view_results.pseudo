@@ -1,0 +1,62 @@
+//U6-F1: Load Completed Exams 
+function loadCompletedExams(studentID) {
+    Set exams = SELECT exam_id, title, date_completed, grade
+                FROM submissions
+                JOIN exams USING(exam_id)
+                WHERE student_id = studentID AND status = 'GRADED'
+
+    if (exams)
+    do  
+        Return exams
+    end
+
+    Return "No submissions found"          
+}
+
+//U6-F2: Search Exam by Course Code
+function searchExam(studentID, courseCode) {
+    Set results = SELECT * FROM exams
+                  JOIN submissions USING(exam_id)
+                  JOIN courses USING(course_id)
+                  WHERE student_id = studentID
+                    AND courses.course_code LIKE courseCode
+                    AND status = 'GRADED'
+
+    if (results)
+    do  
+        Return results
+    end
+
+    Return "No submissions found" 
+}
+ 
+ 
+//U6-F3: View Exam Details
+function viewExamDetails(examID, studentID) {
+    Set submission = SELECT * FROM submissions
+                     WHERE exam_id = examID AND student_id = studentID
+
+    if (submission.status != 'GRADED')
+    do
+        Return error('Exam not graded yet')
+    end
+
+    Set answers = SELECT question_text, student_answer
+                  FROM answers
+                  JOIN questions USING(question_id)
+                  WHERE submission_id = submission.submission_id
+
+    Set feedback = SELECT feedback_text
+                   FROM submission_feedback
+                   WHERE submission_id = submission.submission_id
+
+    Return {submission, answers, feedback}
+}
+
+//U6-F4: IT Support Verification
+procedure verifyResultIntegrity(exam_id) {
+    CHECK that each submission has valid grades
+    REPAIR inconsistencies if found
+    
+    Output fixes
+}

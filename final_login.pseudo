@@ -1,0 +1,37 @@
+//U2-F1 login fields are created and validated by WTForms
+CLASS LoginForm {
+    FIELDS {
+        email, password, submit
+    }
+}
+
+//U2-F2 User loader,  session will be handled with Flask-Login
+function load_user(user_id) {
+    Return (SELECT * FROM users WHERE user_id = user_id)
+}
+
+//  U2-F3 Login
+ROUTE 'login' {
+    // form created by class LoginForm
+    CREATE form = LoginForm()
+
+    if (form is submitted AND valid)
+    do
+        FIND user BY email
+        if (user exists AND bcrypt.check_password_hash(password matches))
+        do
+            CALL login_user(user)
+            // login successful
+            REDIRECT to 'dashboard'
+        end
+    end
+
+    //login failed
+    Return ROUTE('login')
+}
+
+//  U2-F4 Logout, session will be handled with Flask-Login
+ROUTE 'logout' {
+    CALL logout_user() // session handle by Flask-Login
+    REDIRECT to 'login'
+}

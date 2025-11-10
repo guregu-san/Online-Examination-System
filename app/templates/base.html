@@ -1,0 +1,20 @@
+{% extends "bootstrap/base.html" %}
+
+{%block title%}OES{%endblock%}
+
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% endblock %}
+
+{% block navbar %}
+{% endblock %}
+
+
+
+{%block content %}
+
+{%block main_content%}{%endblock%}
+
+
+{%endblock%}

@@ -4,10 +4,9 @@
 # how to use virtual environment
 Packages:
 
-Mac Command - pip3 install flask flask_sqlalchemy flask_login flask_bcrypt flask_wtf wtforms email_validator
+Mac Command - pip3 install flask flask_sqlalchemy flask_login flask_bcrypt flask_wtf wtforms email_validator Flask-Bootstrap
 
-Windows Command - pip install flask flask_sqlalchemy flask_login flask_bcrypt flask_wtf wtforms email_validator
-
+Windows Command - pip install flask flask_sqlalchemy flask_login flask_bcrypt flask_wtf wtforms email_validator Flask-Bootstrap
 
 env for python:
 
@@ -21,7 +20,7 @@ source .venv/bin/activate
 python -m pip install --upgrade pip setuptools wheel
 
 # 4) install the packages
-pip install flask flask_sqlalchemy flask_login flask_bcrypt flask_wtf wtforms email_validator
+pip install ...
 
 # 5) quick verification
 pip list

@@ -1,12 +1,12 @@
 CREATE TABLE instructors (
-    instructor_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    instructor_id INTEGER PRIMARY KEY,
     name TEXT,
     email TEXT,
     password_hash TEXT
 );
 
 CREATE TABLE courses (
-    course_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    course_id INTEGER PRIMARY KEY,
     course_code TEXT,
     course_name TEXT,
     instructor_id INTEGER,
@@ -14,7 +14,7 @@ CREATE TABLE courses (
 );
 
 CREATE TABLE exams (
-    exam_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    exam_id INTEGER PRIMARY KEY,
     course_id INTEGER,
     instructor_id INTEGER,
     title TEXT,
@@ -27,7 +27,7 @@ CREATE TABLE exams (
 );
 
 CREATE TABLE questions (
-    question_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    question_id INTEGER PRIMARY KEY,
     exam_id INTEGER,
     question_text TEXT,
     question_type TEXT CHECK(question_type IN ('MCQ_SINGLE', 'MCQ_MULTIPLE', 'TRUE_FALSE', 'SHORT_ANSWER', 'NUMERICAL', 'ESSAY')),
@@ -36,7 +36,7 @@ CREATE TABLE questions (
 );
 
 CREATE TABLE answers (
-    answer_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    answer_id INTEGER PRIMARY KEY,
     question_id INTEGER,
     answer_text TEXT,
     is_correct BOOLEAN,

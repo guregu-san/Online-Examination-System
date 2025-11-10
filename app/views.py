@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template, redirect, url_for, flash
+from flask import render_template, redirect, url_for
 from flask_bootstrap import Bootstrap
 
 from app.form import LoginForm, RegisterForm

@@ -7,6 +7,4 @@ app.config['SECRET_KEY'] = 'dupa123'
 bs = Bootstrap(app)
 
 
-from app import views
-
-
+from app import views, form

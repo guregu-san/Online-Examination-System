@@ -43,6 +43,18 @@ form{
 	gap: 16px;
 }
 
+.form-row{
+	display:flex;
+	flex-direction:column
+}
+
+
+.radio-inline{
+	display:flex;
+	gap:26px;
+	flex-wrap:wrap;
+}
+
 /* 
 
 
@@ -53,7 +65,6 @@ h1{
 	color:var(--text);
 }
 
-form{display:flex;flex-direction:column;gap:12px}
 
 input[type="text"], input[type="password"], input[type="email"], textarea, select{
 	width:100%;
@@ -96,7 +107,6 @@ input[type="submit"], button.btn{
 
 .link{color:var(--accent);text-decoration:none;font-weight:500}
 
-.form-row{display:flex;flex-direction:column}
 
 
 a{
@@ -121,23 +131,5 @@ a:focus-visible{
 
 a.small{font-size:13px;color:var(--muted)}
 
-.radio-inline{
-	display:flex;
-	gap:12px;
-	align-items:center;
-	margin-top:8px;
-	flex-wrap:wrap;
-}
-.radio-inline .radio-item{
-	display:inline-flex;
-	align-items:center;
-	gap:8px;
-	margin:0;
-	cursor:pointer;
-	font-size:14px;
-	color:var(--text);
-}
-.radio-inline .radio-item input[type="radio"]{
-	margin:0;
-}
+
  */

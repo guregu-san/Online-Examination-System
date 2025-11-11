@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS students (
     roll_number INTEGER PRIMARY KEY,
     name TEXT,
     email TEXT UNIQUE,
-    password TEXT,
+    password_hash TEXT,
     contact_number INTEGER
 );
 
@@ -22,15 +22,15 @@ CREATE TABLE IF NOT EXISTS courses (
 
 CREATE TABLE IF NOT EXISTS exams (
     exam_id INTEGER PRIMARY KEY,
-    course_id INTEGER,
+    course_code INTEGER,
     instructor_email TEXT,
     title TEXT,
     time_limit INTEGER,
     security_settings TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (course_id) REFERENCES courses(course_id),
-    FOREIGN KEY (instructor_id) REFERENCES instructors(instructor_id)
+    FOREIGN KEY (course_code) REFERENCES courses(course_code),
+    FOREIGN KEY (instructor_email) REFERENCES instructors(instructor_email)
 );
 
 CREATE TABLE IF NOT EXISTS questions (
@@ -63,5 +63,5 @@ CREATE TABLE IF NOT EXISTS submissions (
     answers TEXT,
     total_score INTEGER,
     FOREIGN KEY (exam_id) REFERENCES exams (exam_id),
-    FOREIGN KEY (student_email) REFERENCES students (email)
+    FOREIGN KEY (roll_number) REFERENCES students (roll_number)
 );

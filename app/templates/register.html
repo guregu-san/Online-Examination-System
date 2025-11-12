@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+{%block title%}Login!{%endblock%}
+
+{%block main_content%}
+<div class="card">
+    <h1>Register Page</h1>
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+
+        <div class="form-row">
+            {{ form.role.label }}
+            <div class="radio-inline">
+                {%- for subfield in form.role -%}
+                <label class="radio-item">{{ subfield }} {{ subfield.label.text }}</label>
+                {%- endfor -%}
+            </div>
+        </div>
+
+        <div>
+            {{ form.email.label }}<br>
+            {{ form.email }}
+        </div>
+        <div>
+            {{ form.password.label }}<br>
+            {{ form.password }}
+        </div>
+        <div id="student-fields">
+            <div>
+                {{ form.name.label }}<br>
+                {{ form.name }}
+            </div>
+            <br>
+            <div>
+                {{ form.roll_number.label }}<br>
+                {{ form.roll_number }}
+            </div>
+            <br>
+            <div>
+                {{ form.contact_number.label }}<br>
+                {{ form.contact_number }}
+            </div>
+            <br>
+        </div>
+        <div>
+            {{ form.submit }}
+        </div>
+    </form>
+    <div>
+        <a href="{{url_for('login')}}">Already have an account? Log In</a><br>
+    </div>
+</div>
+
+
+<script>
+    // show/hide student-only fields based on selected role
+    function updateStudentFields() {
+        const studentFields = document.getElementById('student-fields');
+        const roleInputs = document.getElementsByName('role');
+        let role = 'student';
+        for (const r of roleInputs) {
+            if (r.checked) { role = r.value; break; }
+        }
+        if (role === 'student') {
+            studentFields.style.display = 'block';
+        } else {
+            studentFields.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const roleInputs = document.getElementsByName('role');
+        for (const r of roleInputs) {
+            r.addEventListener('change', updateStudentFields);
+        }
+        updateStudentFields();
+    });
+</script>
+{%endblock%}

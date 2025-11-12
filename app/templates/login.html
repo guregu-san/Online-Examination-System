@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+{%block title%}Login!{%endblock%}
+
+{%block main_content%}
+ <div class="card"> 
+
+        <h1>Login Page</h1>
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            {{ form.email }}
+            {{ form.password }}
+            {{ form.submit }}
+        </form>
+
+        <a href="{{url_for('register')}}">Don't have an account? Sign up</a><br>
+
+    </div>
+{%endblock%}

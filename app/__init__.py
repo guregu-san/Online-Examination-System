@@ -7,4 +7,8 @@ app.config['SECRET_KEY'] = 'dupa123'
 
 bs = Bootstrap(app)
 
-from app.auth import views, form
+from app import home
+from .auth import auth
+
+
+app.register_blueprint(auth.authBp)

@@ -9,6 +9,9 @@ bs = Bootstrap(app)
 
 from app import home
 from .auth import auth
-
+from app.exam.exam import examBp
+from app.submission.submission import submissionBp
 
 app.register_blueprint(auth.authBp)
+app.register_blueprint(examBp)
+app.register_blueprint(submissionBp)

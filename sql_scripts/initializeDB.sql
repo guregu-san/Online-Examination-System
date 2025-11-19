@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS instructors (
     instructor_id INTEGER PRIMARY KEY,
     name TEXT,
-    email TEXT,
+    email TEXT UNIQUE,
     password_hash TEXT
 );
 
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS exams (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (course_code) REFERENCES courses(course_code),
-    FOREIGN KEY (instructor_email) REFERENCES instructors(instructor_email)
+    FOREIGN KEY (instructor_email) REFERENCES instructors(email)
 );
 
 CREATE TABLE IF NOT EXISTS questions (

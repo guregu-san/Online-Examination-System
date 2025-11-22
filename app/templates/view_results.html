@@ -1,0 +1,60 @@
+<!DOCTYPE html> <!-- CHAT GENERATED TEMPLATE IM CURRENTLY BUILDING ON-->
+<html>
+<head>
+    <title>My Exam Results</title>
+    <style>
+        body { font-family: sans-serif; margin: 30px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { padding: 10px; border: 1px solid #ccc; }
+        th { background: #eee; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .filter-box { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<h2>Completed Exams</h2>
+
+<div class="filter-box">
+    <form method="get">
+        <input type="hidden" name="roll_number" value="{{ roll_number }}">
+
+        <label>Course code:</label>
+        <input type="text" name="course_code" value="{{ course_code }}" placeholder="e.g. CSC101">
+
+        <label>Instructor:</label>
+        <input type="text" name="instructor" value="{{ instructor_name }}" placeholder="Instructor name">
+
+        <button type="submit">Search</button>
+    </form>
+</div>
+
+<table>
+    <tr>
+        <th>Exam Title</th>
+        <th>Course</th>
+        <th>Instructor</th>
+        <th>Status</th>
+        <th>Score</th>
+        <th>View</th>
+    </tr>
+
+    {% for r in results %}
+    <tr>
+        <td>{{ r.title }}</td>
+        <td>{{ r.course_code }}</td>
+        <td>{{ r.instructor_name }}</td>
+        <td>{{ r.status }}</td>
+        <td>{% if r.total_score != None %}{{ r.total_score }}{% else %}-{% endif %}</td>
+        <td>
+            <a href="/results/{{ r.submission_id }}?roll_number={{ roll_number }}">
+                View Result
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>

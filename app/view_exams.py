@@ -1,0 +1,214 @@
+import sqlite3
+import json
+from flask import Blueprint, request, jsonify, render_template
+#from app import app
+
+
+# ---- DB helper ---- IDK WHAT THE HELL THIS IS FOR ----
+def get_db():
+    conn = sqlite3.connect("oesDB.db")
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON;")
+    return conn
+
+def row_to_dict(row):
+    return {k: row[k] for k in row.keys()}
+
+
+# ---- Blueprint ---- IDK WHAT THE HELL THIS IS FOR ----
+exam_viewBp = Blueprint('exam_view', __name__, template_folder='templates')
+
+
+# U6-F1: List completed exams (results) for a student
+@exam_viewBp.route('/results', methods=['GET'])
+def list_results():
+    # TODO: fetch roll_number from session/login later!!!!!!
+    roll_number = request.args.get('roll_number')
+    course_code = request.args.get('course_code')
+    instructor_name = request.args.get('instructor')
+
+    if not roll_number:
+        # temporary error message – in practice, user should be logged in
+        return "roll_number query parameter is required for now", 400
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    query = """
+        SELECT
+            s.submission_id,
+            s.exam_id,
+            s.total_score,
+            s.status,
+            s.submitted_at,
+            e.title,
+            e.course_code,
+            c.course_name,
+            i.name AS instructor_name,
+            i.email AS instructor_email
+        FROM submissions s
+        JOIN exams e ON e.exam_id = s.exam_id
+        JOIN courses c ON c.course_code = e.course_code
+        JOIN instructors i ON i.email = e.instructor_email
+        WHERE s.roll_number = ?
+          AND s.status IN ('SUBMITTED', 'GRADED')
+    """
+    params = [roll_number]
+
+    if course_code:
+        query += " AND e.course_code = ?"
+        params.append(course_code)
+
+    if instructor_name:
+        query += " AND i.name LIKE ?"
+        params.append(f"%{instructor_name}%")
+
+    query += " ORDER BY s.submitted_at DESC"
+
+    cur.execute(query, params)
+    rows = cur.fetchall()
+    conn.close()
+
+    results = [row_to_dict(r) for r in rows]
+
+    # HTML-view
+    return render_template(
+        'view_results.html',
+        results=results,
+        roll_number=roll_number,
+        course_code=course_code or "",
+        instructor_name=instructor_name or ""
+    )
+
+
+# JSON API for testing
+@exam_viewBp.route('/api/results', methods=['GET'])
+def api_list_results():
+    roll_number = request.args.get('roll_number')
+    if not roll_number:
+        return jsonify(error="roll_number required"), 400
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT
+            s.submission_id,
+            s.exam_id,
+            s.total_score,
+            s.status,
+            s.submitted_at,
+            e.title,
+            e.course_code
+        FROM submissions s
+        JOIN exams e ON e.exam_id = s.exam_id
+        WHERE s.roll_number = ?
+          AND s.status IN ('SUBMITTED', 'GRADED')
+        ORDER BY s.submitted_at DESC
+    """, (roll_number,))
+    rows = cur.fetchall()
+    conn.close()
+
+    return jsonify([row_to_dict(r) for r in rows])
+
+
+# U6-F2: View single exam result (grade + answers)
+@exam_viewBp.route('/results/<int:submission_id>', methods=['GET'])
+def view_result_detail(submission_id):
+    roll_number = request.args.get('roll_number') 
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    # fetch submission + check ownership
+    cur.execute("""
+        SELECT s.*, e.title, e.course_code, e.instructor_email, e.exam_id
+        FROM submissions s
+        JOIN exams e ON e.exam_id = s.exam_id
+        WHERE s.submission_id = ?
+    """, (submission_id,))
+    sub = cur.fetchone()
+
+    if not sub:
+        conn.close()
+        return "Submission not found", 404
+
+    if roll_number and str(sub["roll_number"]) != str(roll_number):
+        conn.close()
+        return "Not allowed to view this result", 403
+
+    status = sub["status"]
+    exam_id = sub["exam_id"]
+    total_score = sub["total_score"]
+    answers_json = sub["answers"] or "{}"
+    answers = json.loads(answers_json)
+
+    # if not graded, show message
+    if status != "GRADED":
+        conn.close()
+        return render_template(
+            'view_result_details.html',
+            exam=None,
+            questions=[],
+            message="Exam not graded yet",
+            total_score=None
+        )
+
+    # fetch questions + options
+    cur.execute("""
+        SELECT q.question_id, q.question_text, q.points, q.is_multiple_correct,
+               o.option_id, o.option_text, o.is_correct
+        FROM questions q
+        LEFT JOIN options o ON o.question_id = q.question_id
+        WHERE q.exam_id = ?
+        ORDER BY q.order_index, o.option_id
+    """, (exam_id,))
+    rows = cur.fetchall()
+    conn.close()
+
+    # build structure
+    questions = {}
+    for r in rows:
+        qid = r["question_id"]
+        if qid not in questions:
+            questions[qid] = {
+                "question_id": qid,
+                "question_text": r["question_text"],
+                "points": r["points"],
+                "is_multiple_correct": bool(r["is_multiple_correct"]),
+                "options": []
+            }
+        if r["option_id"] is not None:
+            questions[qid]["options"].append({
+                "option_id": r["option_id"],
+                "option_text": r["option_text"],
+                "is_correct": bool(r["is_correct"])
+            })
+
+    # highlight selected answers
+    for qid, qdata in questions.items():
+        selected_ids = answers.get(str(qid), [])
+        if isinstance(selected_ids, int):
+            selected_ids = [selected_ids]
+        selected_ids = set(map(int, selected_ids)) if selected_ids else set()
+
+        for opt in qdata["options"]:
+            opt["selected_by_student"] = opt["option_id"] in selected_ids
+
+    exam_info = {
+        "title": sub["title"],
+        "course_code": sub["course_code"],
+        "exam_id": exam_id
+    }
+
+    return render_template(
+        'view_result_details.html',
+        exam=exam_info,
+        questions=list(questions.values()),
+        total_score=total_score,
+        message=None
+    )
+
+
+# register blueprint on app --- was causing issues to run project ---
+#app.register_blueprint(exam_viewBp)

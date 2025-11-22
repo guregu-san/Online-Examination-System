@@ -1,0 +1,52 @@
+<!DOCTYPE html> <!-- CHAT GENERATED SHIT-->
+<html>
+<head>
+    <title>Exam Result</title>
+    <style>
+        body { font-family: sans-serif; margin: 30px; }
+        .question-box { margin-bottom: 25px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; }
+        .option { margin-left: 25px; }
+        .selected { font-weight: bold; color: #0066cc; }
+        .correct { color: green; }
+        .not-graded { color: darkred; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+{% if message %}
+    <h2 class="not-graded">{{ message }}</h2>
+    <a href="/results?roll_number={{ request.args.get('roll_number') }}">Back</a>
+{% else %}
+
+<h2>{{ exam.title }} ({{ exam.course_code }})</h2>
+<p><strong>Total Score:</strong> {{ total_score }}</p>
+
+<hr>
+
+{% for q in questions %}
+<div class="question-box">
+    <h3>Q{{ loop.index }}: {{ q.question_text }}</h3>
+
+    {% for opt in q.options %}
+        <div class="option">
+            {% if opt.selected_by_student %}
+                <span class="selected">✔ {{ opt.option_text }}</span>
+            {% else %}
+                {{ opt.option_text }}
+            {% endif %}
+
+            {% if opt.is_correct %}
+                <span class="correct"> (correct)</span>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+</div>
+{% endfor %}
+
+<a href="/results?roll_number={{ request.args.get('roll_number') }}">Back to Results</a>
+
+{% endif %}
+
+</body>
+</html>

@@ -1,17 +1,19 @@
+'''Third-party packages'''
 from flask import Flask
 from flask_bootstrap import Bootstrap
+
+'''Local packages'''
+from app import home
+from .auth import auth
+from app.exam.exam import examBp
+#from app.submission.submission import submissionBp
+from .view_exams import exam_viewBp
 
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'dupa123'
 
 bs = Bootstrap(app)
-
-from app import home
-from .auth import auth
-from app.exam.exam import examBp
-#from app.submission.submission import submissionBp
-from .view_exams import exam_viewBp
 
 app.register_blueprint(auth.authBp)
 app.register_blueprint(examBp)

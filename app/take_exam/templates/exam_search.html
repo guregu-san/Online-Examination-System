@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+{%block title%}Exam Search{%endblock%}
+
+{%block main_content%}
+ <div class="card"> 
+
+        <h1>Exam Search</h1>
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            {{ form.examID }}
+            {{ form.submit }}
+            <button formaction="{{ url_for('dashboard') }}">Go Back</button>
+        </form>
+
+    </div>
+{%endblock%}

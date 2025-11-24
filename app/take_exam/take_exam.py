@@ -1,8 +1,10 @@
 import sqlite3
 import json
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, jsonify, request
 
-submissionBp = Blueprint("submissionBp", __name__, url_prefix="/submission")
+from app.take_exam.forms import ExamSearchForm, ExamInitializationForm
+
+takeExamBp = Blueprint("takeExamBp", __name__, url_prefix="/take_exam",  template_folder="templates")
 
 def get_db():
     conn = sqlite3.connect("oesDB.db")
@@ -41,8 +43,26 @@ def calculate_score(exam_id, answers_dict):
     conn.close()
     return total_score
 
+# Find the exam
+@takeExamBp.route('/exam_search', methods=['GET'])
+def exam_search():
+    form = ExamSearchForm()
+    if form.validate_on_submit():
+        return redirect(url_for('exam_initialization'))
+        
+    return render_template('exam_search.html', form=form)
+
+# Accept conditions and initialize
+@takeExamBp.route('/exam_initialization', methods=['GET', 'POST'])
+def exam_initialization():
+    form = ExamInitializationForm()
+    if form.validate_on_submit():
+        return redirect(url_for('start'))
+        
+    return render_template('exam_initialization.html', form=form)
+
 # Start Exam
-@submissionBp.route("/<int:exam_id>/start", methods=["POST"])
+@takeExamBp.route("/<int:exam_id>/start", methods=["POST"])
 def start_exam(exam_id):
     data = request.get_json(silent=True) or {}
     roll_number = data.get("roll_number")
@@ -93,7 +113,7 @@ def start_exam(exam_id):
     return jsonify(message="Exam started", submission_id=sid), 201
 
 # Save Progress
-@submissionBp.route("/<int:exam_id>/save", methods=["PATCH"])
+@takeExamBp.route("/<int:exam_id>/save", methods=["PATCH"])
 def save_progress(exam_id):
     data = request.get_json(silent=True) or {}
     roll_number = data.get("roll_number")
@@ -129,7 +149,7 @@ def save_progress(exam_id):
     return jsonify(message="Progress saved"), 200
 
 # Submit Exam
-@submissionBp.route("/<int:exam_id>/submit", methods=["POST"])
+@takeExamBp.route("/<int:exam_id>/submit", methods=["POST"])
 def submit_exam(exam_id):
     data = request.get_json(silent=True) or {}
     roll_number = data.get("roll_number")
@@ -175,7 +195,7 @@ def submit_exam(exam_id):
     return jsonify(message="Submitted and graded", total_score=total), 200
 
 # Check Status
-@submissionBp.route("/<int:exam_id>/status", methods=["GET"])
+@takeExamBp.route("/<int:exam_id>/status", methods=["GET"])
 def submission_status(exam_id):
     roll_number = request.args.get("roll_number")
 

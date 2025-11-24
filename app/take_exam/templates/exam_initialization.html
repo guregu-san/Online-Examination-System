@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+{%block title%}Exam Initialization{%endblock%}
+
+{%block main_content%}
+ <div class="card"> 
+
+        <h1>Exam Title</h1>
+        <p>blah blah blah</p>
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            {{ form.password }}
+            {{ form.submit }}
+            <button formaction="{{ url_for('exam_search') }}">Cancel</button>
+        </form>
+
+    </div>
+{%endblock%}

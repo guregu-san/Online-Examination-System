@@ -13,5 +13,5 @@ def dashboard():
 '''
 @app.route('/take_exam', methods=['GET', 'POST'])
 def takeExam():
-    return render_template('exam_create.html')
+    return render_template('submission.html')
 '''

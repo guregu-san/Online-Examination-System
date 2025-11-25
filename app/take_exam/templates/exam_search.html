@@ -12,8 +12,7 @@
             {{ form.hidden_tag() }}
             {{ form.examID }}
             {{ form.submit }}
-            <button formaction="{{ url_for('dashboard') }}">Go Back</button>
         </form>
-
+        <a href="{{ url_for('dashboard') }}" class=".form-row">Go Back</a>
     </div>
 {%endblock%}

@@ -9,9 +9,3 @@ def home():
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     return render_template('dashboard.html')
-
-'''
-@app.route('/take_exam', methods=['GET', 'POST'])
-def takeExam():
-    return render_template('submission.html')
-'''

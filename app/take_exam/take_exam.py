@@ -1,18 +1,20 @@
 import sqlite3
 import json
-from flask import Blueprint, render_template, redirect, url_for, jsonify, request
+from flask import Blueprint, render_template, redirect, url_for, jsonify, request, session
 
-from app.take_exam.forms import ExamSearchForm, ExamInitializationForm
+from app.take_exam.forms import ExamSearchForm, ExamInitializationForm, SubmissionForm
 
 takeExamBp = Blueprint("takeExamBp", __name__, url_prefix="/take_exam",  template_folder="templates")
 
-def get_db():
+'''Utility functions'''
+def get_db(): # Connect to the SQLite database
     conn = sqlite3.connect("oesDB.db")
-    conn.row_factory = sqlite3.Row
+    conn.row_factory = sqlite3.Row # Allow row access by column name
     conn.execute("PRAGMA foreign_keys = ON;")
+
     return conn
 
-def row_to_dict(row):
+def row_to_dict(row): # Convert SQLite row to dictionary
     return {k: row[k] for k in row.keys()}
 
 def calculate_score(exam_id, answers_dict):
@@ -43,179 +45,125 @@ def calculate_score(exam_id, answers_dict):
     conn.close()
     return total_score
 
+'''Routes'''
 # Find the exam
-@takeExamBp.route('/exam_search', methods=['GET'])
+@takeExamBp.route('', methods=['GET', 'POST'])
 def exam_search():
     form = ExamSearchForm()
     if form.validate_on_submit():
-        return redirect(url_for('exam_initialization'))
+        exam_id = form.examID.data
+        conn = get_db()
+        cur = conn.cursor()
+
+        cur.execute("SELECT exam_id FROM exams WHERE exam_id=?", (exam_id,))
+        row = cur.fetchone()
+        conn.close()
+        
+        if not row:
+            form.examID.errors = ("Exam not found.",)
+            return render_template('exam_search.html', form=form)
+        
+        # Store exam_id in session as a cookie
+        session['exam_id'] = row['exam_id']
+        return redirect(url_for('takeExamBp.exam_initialization'))
         
     return render_template('exam_search.html', form=form)
 
-# Accept conditions and initialize
+# Show exam info and prompt to start
 @takeExamBp.route('/exam_initialization', methods=['GET', 'POST'])
 def exam_initialization():
+    exam_id = session.get('exam_id')
+    if not exam_id:
+        return redirect(url_for('takeExamBp.exam_search'))
+    
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT exam_id, title, time_limit, course_code
+        FROM exams WHERE exam_id=?
+    """, (exam_id,))
+    exam = cur.fetchone()
+    conn.close()
+    
+    if not exam:
+        session.pop('exam_id', None)
+        return redirect(url_for('takeExamBp.exam_search'))
+    
     form = ExamInitializationForm()
     if form.validate_on_submit():
-        return redirect(url_for('start'))
+        return redirect(url_for('takeExamBp.start'))
         
-    return render_template('exam_initialization.html', form=form)
+    return render_template('exam_initialization.html', form=form, exam=row_to_dict(exam))
 
-# Start Exam
-@takeExamBp.route("/<int:exam_id>/start", methods=["POST"])
-def start_exam(exam_id):
-    data = request.get_json(silent=True) or {}
-    roll_number = data.get("roll_number")
-
-    if not roll_number:
-        return jsonify(error="roll_number required"), 400
-
+# Show exam questions
+@takeExamBp.route('/start', methods=['GET', 'POST'])
+def start():
+    exam_id = session.get('exam_id')
+    if not exam_id:
+        return redirect(url_for('takeExamBp.exam_search'))
+    
     conn = get_db()
     cur = conn.cursor()
-
-    cur.execute("SELECT exam_id FROM exams WHERE exam_id=?", (exam_id,))
-    if not cur.fetchone():
+    
+    # Fetch exam
+    cur.execute("SELECT exam_id, title, time_limit FROM exams WHERE exam_id=?", (exam_id,))
+    exam = cur.fetchone()
+    if not exam:
+        session.pop('exam_id', None)
         conn.close()
-        return jsonify(error="Exam not found"), 404
-
-    cur.execute("SELECT roll_number FROM students WHERE roll_number=?", (roll_number,))
-    if not cur.fetchone():
-        conn.close()
-        return jsonify(error="Student not found"), 404
-
-    # Check if submission exists already
+        return redirect(url_for('takeExamBp.exam_search'))
+    
+    # Fetch exam questions
     cur.execute("""
-        SELECT submission_id, status
-        FROM submissions
-        WHERE exam_id=? AND roll_number=?
-        ORDER BY started_at DESC
-    """, (exam_id, roll_number))
-    row = cur.fetchone()
-
-    if row and row["status"] in ("IN_PROGRESS", "SUBMITTED", "GRADED"):
-        conn.close()
-        return jsonify(
-            error="Submission already exists",
-            submission_id=row["submission_id"],
-            status=row["status"]
-        ), 400
-
-    # Create new submission
-    cur.execute("""
-        INSERT INTO submissions (exam_id, roll_number, started_at, status, answers, total_score)
-        VALUES (?, ?, CURRENT_TIMESTAMP, 'IN_PROGRESS', ?, 0)
-    """, (exam_id, roll_number, json.dumps({})))
-
-    sid = cur.lastrowid
-    conn.commit()
+        SELECT question_id, question_text, is_multiple_correct, points, order_index
+        FROM questions WHERE exam_id=?
+        ORDER BY order_index ASC
+    """, (exam_id,))
+    questions = cur.fetchall()
+    
+    # Fetch options for each question
+    questions_with_options = [] # 2D structure because each question has multiple options
+    for q in questions:
+        cur.execute("""
+            SELECT option_id, option_text
+            FROM options WHERE question_id=?
+        """, (q['question_id'],))
+        options = cur.fetchall()
+        q_dict = row_to_dict(q)
+        q_dict['options'] = [row_to_dict(o) for o in options]
+        questions_with_options.append(q_dict)
+    
     conn.close()
+    
+    form = SubmissionForm()
 
-    return jsonify(message="Exam started", submission_id=sid), 201
+    # Populate the dynamic form with questions
+    for i, q in enumerate(questions_with_options):
+        if i >= len(form.questions):
+            # append new question subform if needed
+            form.questions.append_entry()
+        
+        subform = form.questions[i]
+        subform.question_id.data = str(q['question_id'])
+        subform.single_or_multi.data = 'multi' if q['is_multiple_correct'] else 'single'
+        
+        # Populate choices
+        choices = [(int(opt['option_id']), opt['option_text']) for opt in q['options']]
+        subform.answer_single.choices = choices
+        subform.answer_multi.choices = choices
+    
+    if form.validate_on_submit():
+        # Collect answers
+        answers = {}
+        for subform in form.questions:
+            qid = subform.question_id.data
 
-# Save Progress
-@takeExamBp.route("/<int:exam_id>/save", methods=["PATCH"])
-def save_progress(exam_id):
-    data = request.get_json(silent=True) or {}
-    roll_number = data.get("roll_number")
-    answers = data.get("answers")
-
-    if not roll_number:
-        return jsonify(error="roll_number required"), 400
-    if answers is None:
-        return jsonify(error="answers required"), 400
-
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("""
-        SELECT submission_id FROM submissions
-        WHERE exam_id=? AND roll_number=? AND status='IN_PROGRESS'
-    """, (exam_id, roll_number))
-
-    row = cur.fetchone()
-    if not row:
-        conn.close()
-        return jsonify(error="Active submission not found"), 404
-
-    cur.execute("""
-        UPDATE submissions
-        SET answers=?, updated_at=CURRENT_TIMESTAMP
-        WHERE submission_id=?
-    """, (json.dumps(answers), row["submission_id"]))
-
-    conn.commit()
-    conn.close()
-
-    return jsonify(message="Progress saved"), 200
-
-# Submit Exam
-@takeExamBp.route("/<int:exam_id>/submit", methods=["POST"])
-def submit_exam(exam_id):
-    data = request.get_json(silent=True) or {}
-    roll_number = data.get("roll_number")
-    final_answers = data.get("answers")
-
-    if not roll_number:
-        return jsonify(error="roll_number required"), 400
-
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("""
-        SELECT submission_id, answers, status
-        FROM submissions
-        WHERE exam_id=? AND roll_number=?
-        ORDER BY started_at DESC
-    """, (exam_id, roll_number))
-
-    row = cur.fetchone()
-    if not row:
-        conn.close()
-        return jsonify(error="Submission not found"), 404
-
-    if row["status"] in ("SUBMITTED", "GRADED"):
-        conn.close()
-        return jsonify(error="Exam already submitted"), 400
-
-    current_answers = json.loads(row["answers"]) if row["answers"] else {}
-    merged_answers = final_answers if final_answers else current_answers
-
-    total = calculate_score(exam_id, merged_answers)
-
-    cur.execute("""
-        UPDATE submissions
-        SET answers=?, submitted_at=CURRENT_TIMESTAMP,
-            status='GRADED', total_score=?, updated_at=CURRENT_TIMESTAMP
-        WHERE submission_id=?
-    """, (json.dumps(merged_answers), total, row["submission_id"]))
-
-    conn.commit()
-    conn.close()
-
-    return jsonify(message="Submitted and graded", total_score=total), 200
-
-# Check Status
-@takeExamBp.route("/<int:exam_id>/status", methods=["GET"])
-def submission_status(exam_id):
-    roll_number = request.args.get("roll_number")
-
-    if not roll_number:
-        return jsonify(error="roll_number required"), 400
-
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("""
-        SELECT submission_id, status, started_at,
-               submitted_at, total_score
-        FROM submissions
-        WHERE exam_id=? AND roll_number=?
-    """, (exam_id, roll_number))
-
-    row = cur.fetchone()
-    conn.close()
-
-    if not row:
-        return jsonify(error="Submission not found"), 404
-
-    return jsonify(row_to_dict(row)), 200
+            if subform.single_or_multi.data == 'multi':
+                answers[qid] = subform.answer_multi.data
+            else:
+                answers[qid] = subform.answer_single.data
+        
+        # TODO: calculate score and store submission in DB
+        return jsonify(message="Exam submitted", answers=answers), 200
+    
+    return render_template('submission.html', form=form, exam=row_to_dict(exam), questions=questions_with_options)

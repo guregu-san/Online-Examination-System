@@ -44,95 +44,55 @@ VALUES (
 
 #Test Case 1 — Load Manual Grading Dashboard (U4-F1)
 
-```bash
 curl -X GET "http://127.0.0.1:5001/grading/dashboard/teacher@uni.com"
-```
-
----
 
 #Test Case 2 — List Submissions for Exam (U4-F2)
 
-```bash
 curl -X GET "http://127.0.0.1:5001/grading/exams/1/submissions"
-```
-
----
 
 #Test Case 3 — Open Submission for Review (U4-F3)
 
-```bash
 curl -X POST "http://127.0.0.1:5001/grading/submissions/2001/open" \
   -H "Content-Type: application/json" \
   -d '{"instructor_email": "teacher@uni.com"}'
-```
-
----
 
 #Test Case 4 — Toggle Verdict to Correct (U4-F4)
 
-```bash
 curl -X POST \
  "http://127.0.0.1:5001/grading/submissions/2001/answers/1/toggle-verdict" \
  -H "Content-Type: application/json" \
  -d '{"force_correct": true}'
-```
-
----
 
 #Test Case 5 — Set Partial Manual Points (U4-F5)
 
-```bash
 curl -X POST \
  "http://127.0.0.1:5001/grading/submissions/2001/answers/1/manual-points" \
  -H "Content-Type: application/json" \
  -d '{"points": 1.5}'
-```
-
----
 
 #Test Case 6 — Add Instructor Feedback (U4-F6)
 
-```bash
 curl -X POST "http://127.0.0.1:5001/grading/submissions/2001/feedback" \
   -H "Content-Type: application/json" \
   -d '{
         "comment": "Good reasoning, missing formula.",
         "question_id": 1
       }'
-```
-
----
 
 #Test Case 7 — Recalculate Submission Total Score (U4-F7)
 
-```bash
-curl -X POST "http://127.0.0.1:5001/grading/submissions/2001/recalc"
-```
-
----
-
+curl -X POST "http://127.0.0.1:5001/grading/submissions/2001/recalculate"
+    
 #Test Case 8 — Save Submission Review (U4-F8)
 
-```bash
-curl -X POST "http://127.0.0.1:5001/grading/submissions/2001/save"
-```
-
----
+curl -X POST "http://127.0.0.1:5001/grading/submissions/2001/save
 
 #Test Case 9 — Cancel Review (U4-F9)
 
-```bash
 curl -X POST "http://127.0.0.1:5001/grading/submissions/2001/cancel"
-```
-
----
 
 #Test Case 10 — Verify Submission Integrity (U4-F10)
 
-```bash
 curl -X POST \
  "http://127.0.0.1:5001/grading/admin/submissions/2001/verify-integrity"
-```
-
----
 

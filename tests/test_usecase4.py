@@ -1,87 +1,101 @@
 # Use Case 4 — Manual Grading  
-# Test Cases
-
-
-INSERT INTO instructors (id, name, email, password_hash)
+-- Instructors
+INSERT INTO instructors (instructor_id, name, email, password_hash)
 VALUES (1, 'Teacher One', 'teacher@uni.com', 'pass');
 
-INSERT INTO students (id, name, student_id, email)
-VALUES (1, 'Andreas Andreou', 'CSE2023001', 'andreas@student.uni.com');
+-- Students
+INSERT INTO students (roll_number, name, email)
+VALUES ('CSE2023001', 'Andreas Andreou', 'andreas@student.uni.com');
 
-INSERT INTO exams (id, course_code, title, instructor_id, time_limit, total_points)
-VALUES (1, 'CS410', 'CSE410 Midterm', 1, 90, 10);
+-- Course
+INSERT INTO courses (course_code, course_name, instructor_email)
+VALUES ('CS410', 'Networking Fundamentals', 'teacher@uni.com');
 
-INSERT INTO questions (id, exam_id, order_index, question_text, max_points)
-VALUES (1, 1, 1, 'What is TCP used for?', 2);
+-- Exam
+INSERT INTO exams (exam_id, course_code, title, instructor_email, time_limit)
+VALUES (1, 'CS410', 'CSE410 Midterm', 'teacher@uni.com', 90);
 
-INSERT INTO submissions (id, exam_id, student_id, submitted_at, status, auto_score, manual_score, final_score, locked_by, locked_at)
-VALUES (2001, 1, 1, '2025-01-01 10:00:00', 'SUBMITTED', 0, NULL, 0, NULL, NULL);
+-- Question
+INSERT INTO questions (question_id, exam_id, order_index, question_text, points, is_multiple_correct)
+VALUES (1, 1, 1, 'What is TCP used for?', 2, 0);
 
-INSERT INTO submission_answers (id, submission_id, question_id, answer_text, auto_points, manual_points, final_points, manual_override)
-VALUES (3105, 2001, 1, 'Some answer', 0, 0, 0, 0);
+-- Submission
+INSERT INTO submissions (
+    submission_id,
+    exam_id,
+    roll_number,
+    submitted_at,
+    status,
+    answers,
+    total_score
+)
+VALUES (
+    2001,
+    1,
+    'CSE2023001',
+    '2025-01-01 10:00:00',
+    'SUBMITTED',
+    '[]',
+    0
+);
 ```
 
 ---
 
-## Test Case 1 — Load Manual Grading Dashboard (U4-F1)
-**Loads grading dashboard for instructor **1**.
+#Test Case 1 — Load Manual Grading Dashboard (U4-F1)
 
 ```bash
-curl -X GET "http://127.0.0.1:5001/grading/dashboard?user_id=1"
+curl -X GET "http://127.0.0.1:5000/grading/dashboard/teacher@uni.com"
 ```
 
 ---
 
-## Test case 2 — List Submissions for Exam (U4-F2)  
-Lists all submissions for **exam 1**.
+#Test Case 2 — List Submissions for Exam (U4-F2)
 
 ```bash
-curl -X GET "http://127.0.0.1:5001/grading/exams/1/submissions"
+curl -X GET "http://127.0.0.1:5000/grading/exams/1/submissions"
 ```
 
 ---
 
-## Test case 3 — Open Submission for Review (U4-F3)  
-Opens submission **2001** and locks it for instructor **1**.
+#Test Case 3 — Open Submission for Review (U4-F3)
 
 ```bash
-curl -X POST "http://127.0.0.1:5001/grading/submissions/2001/open" \
+curl -X POST "http://127.0.0.1:5000/grading/submissions/2001/open" \
   -H "Content-Type: application/json" \
-  -d '{"instructor_id": 1}'
+  -d '{"instructor_email": "teacher@uni.com"}'
 ```
 
 ---
 
-## Test case 4 — Toggle Verdict to Correct (U4-F4)  
-Forces the answer to be marked **Correct**.
+#Test Case 4 — Toggle Verdict to Correct (U4-F4)
 
 ```bash
-curl -X POST "http://127.0.0.1:5001/grading/answers/3105/toggle-verdict" \
-  -H "Content-Type: application/json" \
-  -d '{"force_correct": true}'
+curl -X POST \
+ "http://127.0.0.1:5000/grading/submissions/2001/answers/1/toggle-verdict" \
+ -H "Content-Type: application/json" \
+ -d '{"force_correct": true}'
 ```
 
 ---
 
-## Test case 5 — Set Partial Manual Points (U4-F5)
-Sets **1.5/2** points manually.
+#Test Case 5 — Set Partial Manual Points (U4-F5)
 
 ```bash
-curl -X POST "http://127.0.0.1:5001/grading/answers/3105/manual-points" \
-  -H "Content-Type: application/json" \
-  -d '{"points": 1.5}'
+curl -X POST \
+ "http://127.0.0.1:5000/grading/submissions/2001/answers/1/manual-points" \
+ -H "Content-Type: application/json" \
+ -d '{"points": 1.5}'
 ```
 
 ---
 
-## Test case 6 — Add Instructor Feedback (U4-F6)**  
-Adds comment for question **1**.
+#Test Case 6 — Add Instructor Feedback (U4-F6)
 
 ```bash
-curl -X POST "http://127.0.0.1:5001/grading/submissions/2001/feedback" \
+curl -X POST "http://127.0.0.1:5000/grading/submissions/2001/feedback" \
   -H "Content-Type: application/json" \
   -d '{
-        "instructor_id": 1,
         "comment": "Good reasoning, missing formula.",
         "question_id": 1
       }'
@@ -89,43 +103,35 @@ curl -X POST "http://127.0.0.1:5001/grading/submissions/2001/feedback" \
 
 ---
 
-## Test case 7 — Recalculate Submission Totals (U4-F7) 
-Recalculates auto + manual + final score.
+#Test Case 7 — Recalculate Submission Total Score (U4-F7)
 
 ```bash
-curl -X POST "http://127.0.0.1:5001/grading/submissions/2001/recalc"
+curl -X POST "http://127.0.0.1:5000/grading/submissions/2001/recalc"
 ```
 
 ---
 
-## Test case 8 — Save Submission Review (U4-F8)  
-Finalizes the grading and releases lock.
+#Test Case 8 — Save Submission Review (U4-F8)
 
 ```bash
-curl -X POST "http://127.0.0.1:5001/grading/submissions/2001/save" \
-  -H "Content-Type: application/json" \
-  -d '{"instructor_id": 1}'
+curl -X POST "http://127.0.0.1:5000/grading/submissions/2001/save"
 ```
 
 ---
 
-## Test case 9 — Cancel Review (U4-F9) 
-Cancels session and discards edits.
+#Test Case 9 — Cancel Review (U4-F9)
 
 ```bash
-curl -X POST "http://127.0.0.1:5001/grading/submissions/2001/cancel" \
-  -H "Content-Type: application/json" \
-  -d '{"instructor_id": 1}'
+curl -X POST "http://127.0.0.1:5000/grading/submissions/2001/cancel"
 ```
 
 ---
 
-## Test case 10 — Verify Submission Integrity (U4-F10) 
-IT 10Support tool—checks & repairs data inconsistencies.
+#Test Case 10 — Verify Submission Integrity (U4-F10)
 
 ```bash
-curl -X POST "http://127.0.0.1:5001/grading/admin/submissions/2001/verify-integrity"
+curl -X POST \
+ "http://127.0.0.1:5000/grading/admin/submissions/2001/verify-integrity"
 ```
 
 ---
-

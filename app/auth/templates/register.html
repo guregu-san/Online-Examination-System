@@ -2,7 +2,7 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 
-{%block title%}Login!{%endblock%}
+{%block title%}Register!{%endblock%}
 
 {%block main_content%}
 <div class="card">
@@ -27,12 +27,11 @@
             {{ form.password.label }}<br>
             {{ form.password }}
         </div>
-        <div id="student-fields">
-            <div>
+        <div>
                 {{ form.name.label }}<br>
                 {{ form.name }}
-            </div>
-            <br>
+        </div>
+        <div id="student-fields">
             <div>
                 {{ form.roll_number.label }}<br>
                 {{ form.roll_number }}

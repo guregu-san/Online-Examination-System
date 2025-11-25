@@ -19,14 +19,26 @@
             </div>
         </div>
 
+        
+
         <div>
             {{ form.email.label }}<br>
             {{ form.email }}
         </div>
+
+        {% if form.email.errors %}
+            <div class="text-danger">
+                {% for error in form.email.errors %}
+                    <small>{{ error }}</small><br>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <div>
             {{ form.password.label }}<br>
             {{ form.password }}
         </div>
+
         <div>
                 {{ form.name.label }}<br>
                 {{ form.name }}
@@ -58,11 +70,11 @@
     function updateStudentFields() {
         const studentFields = document.getElementById('student-fields');
         const roleInputs = document.getElementsByName('role');
-        let role = 'student';
+        let role = 'Student';
         for (const r of roleInputs) {
             if (r.checked) { role = r.value; break; }
         }
-        if (role === 'student') {
+        if (role === 'Student') {
             studentFields.style.display = 'block';
         } else {
             studentFields.style.display = 'none';

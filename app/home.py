@@ -1,11 +1,10 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 from app import app
 from flask_login import login_required, current_user
 
 @app.route('/')
-@app.route('/home', methods=['GET'])
 def home():
-    return render_template('home.html')
+    return redirect(url_for('authBp.login'))
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
@@ -17,3 +16,7 @@ def dashboard():
 def takeExam():
     return render_template('submission.html')
 '''
+
+@app.route('/home', methods=['GET'])
+def homePage():
+    return render_template('home.html')

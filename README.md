@@ -31,3 +31,6 @@ python -c "import flask, flask_sqlalchemy, flask_login; print('flask', flask.__v
 ```
 python3 run.py
 ```
+
+alesy note:
+all user hashed passwords is "dupa12345"

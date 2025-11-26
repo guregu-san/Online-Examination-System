@@ -5,8 +5,8 @@
 {%block title%}Exam Search{%endblock%}
 
 {%block main_content%}
- <div class="card"> 
-
+<div class="card-container">
+    <div class="card">
         <h1>Exam Search</h1>
         <form method="POST" action="">
             {{ form.hidden_tag() }}
@@ -15,4 +15,5 @@
         </form>
         <a href="{{ url_for('dashboard') }}" class=".form-row">Go Back</a>
     </div>
+</div>
 {%endblock%}

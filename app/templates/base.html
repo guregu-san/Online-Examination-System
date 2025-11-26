@@ -8,6 +8,25 @@
 {% endblock %}
 
 {% block navbar %}
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            {% if current_user.is_authenticated %}
+                <a class="navbar-brand" href="{{ url_for('dashboard') }}">OES</a>
+            {% else %}
+                <a class="navbar-brand" href="{{ url_for('home') }}">OES</a>
+            {% endif %}
+        </div>
+        <ul class="nav navbar-nav navbar-right">
+            {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('authBp.logout') }}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+            {% else %}
+                <li><a href="{{ url_for('authBp.login') }}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                <li><a href="{{ url_for('authBp.register') }}"><span class="glyphicon glyphicon-user"></span> Register</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
 {% endblock %}
 
 

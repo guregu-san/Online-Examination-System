@@ -5,17 +5,24 @@
 {%block title%}Login!{%endblock%}
 
 {%block main_content%}
- <div class="card"> 
-
+<div class="card-container">
+    <div class="card">
         <h1>Login Page</h1>
         <form method="POST" action="">
             {{ form.hidden_tag() }}
-            {{ form.email }}
-            {{ form.password }}
-            {{ form.submit }}
+            <div class="form-group">
+                {{ form.email.label }}
+                {{ form.email(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.password.label }}
+                {{ form.password(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
         </form>
-
         <a href="{{url_for('authBp.register')}}">Don't have an account? Sign up</a><br>
-
     </div>
+</div>
 {%endblock%}

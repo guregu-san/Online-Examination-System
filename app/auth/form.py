@@ -6,15 +6,15 @@ from app.auth.models import Students, Instructors
 
 
 class LoginForm(FlaskForm):
-    email = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "email"})
-    password = PasswordField(validators=[InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
+    email = StringField(validators=[InputRequired(), Length(min=4, max=50)], render_kw={"placeholder": "email"})
+    password = PasswordField(validators=[InputRequired(), Length(min=8, max=50)], render_kw={"placeholder": "Password"})
 
     submit = SubmitField('Login')
 
 
 class RegisterForm(FlaskForm):
     email = StringField(validators=[InputRequired(), Length(min=4, max=50)], render_kw={"placeholder": "email"})
-    password = PasswordField(validators=[InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
+    password = PasswordField(validators=[InputRequired(), Length(min=8, max=50)], render_kw={"placeholder": "Password"})
     role = RadioField('Role', choices=[('Student'), ('Instructor')], default='Student')
     roll_number = StringField(validators=[Optional()], render_kw={"placeholder": "Roll Number"})
     name = StringField(validators=[Optional(), Length(min=2, max=50)], render_kw={"placeholder": "Name"})

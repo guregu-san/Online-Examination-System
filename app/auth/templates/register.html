@@ -5,62 +5,62 @@
 {%block title%}Register!{%endblock%}
 
 {%block main_content%}
-<div class="card">
-    <h1>Register Page</h1>
-    <form method="POST" action="">
-        {{ form.hidden_tag() }}
+<div class="card-container">
+    <div class="card">
+        <h1>Register Page</h1>
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
 
-        <div class="form-row">
-            {{ form.role.label }}
-            <div class="radio-inline">
-                {%- for subfield in form.role -%}
-                <label class="radio-item">{{ subfield }} {{ subfield.label.text }}</label>
-                {%- endfor -%}
+            <div class="form-group">
+                {{ form.role.label }}
+                <div class="radio-inline">
+                    {%- for subfield in form.role -%}
+                    <label class="radio-item">{{ subfield }} {{ subfield.label.text }}</label>
+                    {%- endfor -%}
+                </div>
             </div>
-        </div>
 
-        
-
-        <div>
-            {{ form.email.label }}<br>
-            {{ form.email }}
-        </div>
-
-        {% if form.email.errors %}
-            <div class="text-danger">
-                {% for error in form.email.errors %}
-                    <small>{{ error }}</small><br>
-                {% endfor %}
+            <div class="form-group">
+                {{ form.email.label }}<br>
+                {{ form.email(class="form-control") }}
             </div>
-        {% endif %}
 
-        <div>
-            {{ form.password.label }}<br>
-            {{ form.password }}
-        </div>
+            {% if form.email.errors %}
+                <div class="text-danger">
+                    {% for error in form.email.errors %}
+                        <small>{{ error }}</small><br>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
-        <div>
-                {{ form.name.label }}<br>
-                {{ form.name }}
-        </div>
-        <div id="student-fields">
-            <div>
-                {{ form.roll_number.label }}<br>
-                {{ form.roll_number }}
+            <div class="form-group">
+                {{ form.password.label }}<br>
+                {{ form.password(class="form-control") }}
             </div>
-            <br>
-            <div>
-                {{ form.contact_number.label }}<br>
-                {{ form.contact_number }}
+
+            <div class="form-group">
+                    {{ form.name.label }}<br>
+                    {{ form.name(class="form-control") }}
             </div>
-            <br>
-        </div>
+            <div id="student-fields">
+                <div class="form-group">
+                    {{ form.roll_number.label }}<br>
+                    {{ form.roll_number(class="form-control") }}
+                </div>
+                <br>
+                <div class="form-group">
+                    {{ form.contact_number.label }}<br>
+                    {{ form.contact_number(class="form-control") }}
+                </div>
+                <br>
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
         <div>
-            {{ form.submit }}
+            <a href="{{url_for('authBp.login')}}">Already have an account? Log In</a><br>
         </div>
-    </form>
-    <div>
-        <a href="{{url_for('authBp.login')}}">Already have an account? Log In</a><br>
     </div>
 </div>
 

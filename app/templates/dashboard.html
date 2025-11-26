@@ -5,14 +5,15 @@
 {%block title%} Dashboard {%endblock%}
 
 {%block main_content%}
-    <div class="card">
-        <h1>You are logged in</h1>
-        <br>
-        <!-- BELOW IS TEMPORARY BUTTON FOR VIEW_RESULTS PAGE -->
-        <div class="text-center">
-            <p><a class="btn btn-primary" href="http://127.0.0.1:5001/results?roll_number=1">View results</a></p>
+    <div class="card-container">
+        <div class="card">
+            <h1>Welcome, {{ user.name }}!</h1>
+            <p>You are logged in as a {{ user.role }}.</p>
+            <br>
+            <a href="{{ url_for('authBp.logout') }}" class="btn btn-danger">Logout</a>
+            <div class="text-center">
+                <p><a class="btn btn-primary" href="http://127.0.0.1:5001/results?roll_number=1">View results</a></p>
+            </div>
         </div>
-        <!-- TEMPORARY CODE ENDS HERE-->
     </div>
-    
 {%endblock%}

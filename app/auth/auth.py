@@ -2,22 +2,15 @@ from app import app
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_bootstrap import Bootstrap
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
-from app.auth.form import LoginForm, RegisterForm
+from app.auth.form import LoginForm, RegisterForm, bcrypt
 from app.auth.models import db, Students, Instructors
-from flask_bcrypt import Bcrypt
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../oesDB.db'
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 authBp = Blueprint("authBp", __name__, template_folder="templates")
-
-db.init_app(app)
-bcrypt = Bcrypt(app)
 
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'authBp.login'
-
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -33,16 +26,10 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = Students.query.filter_by(email=form.email.data).first()
-        role = "Student"
         if not user:
             user = Instructors.query.filter_by(email=form.email.data).first()
-            role = "Instructor"
-        
-        if user and bcrypt.check_password_hash(user.password_hash, form.password.data):
-            login_user(user)
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid email or password')
+        login_user(user)
+        return redirect(url_for('dashboard'))
 
     return render_template('login.html', form=form)
 
@@ -59,10 +46,6 @@ def register():
     if form.validate_on_submit():
         role = form.role.data or 'Student'
         if role == 'Student':
-            if not form.roll_number.data or not form.contact_number.data:
-                return render_template('register.html', form=form)
-            
-        if role == 'Student':
             student = Students(
                 roll_number = form.roll_number.data,
                 name = form.name.data,
@@ -76,8 +59,6 @@ def register():
                 name = form.name.data,
                 email = form.email.data,
                 password_hash = bcrypt.generate_password_hash(form.password.data),
-
-
             )
             db.session.add(instructor)
 

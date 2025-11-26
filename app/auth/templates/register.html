@@ -38,6 +38,14 @@
                 {{ form.password(class="form-control") }}
             </div>
 
+            {% if form.password.errors %}
+                <div class="text-danger">
+                    {% for error in form.password.errors %}
+                        <small>{{ error }}</small><br>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
             <div class="form-group">
                     {{ form.name.label }}<br>
                     {{ form.name(class="form-control") }}
@@ -47,6 +55,13 @@
                     {{ form.roll_number.label }}<br>
                     {{ form.roll_number(class="form-control") }}
                 </div>
+                {% if form.roll_number.errors %}
+                    <div class="text-danger">
+                        {% for error in form.roll_number.errors %}
+                            <small>{{ error }}</small><br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
                 <br>
                 <div class="form-group">
                     {{ form.contact_number.label }}<br>

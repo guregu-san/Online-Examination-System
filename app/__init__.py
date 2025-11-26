@@ -12,12 +12,10 @@ bs = Bootstrap(app)
 from app import home
 from .auth import auth
 from app.exam.exam import examBp
-#from app.submission.submission import submissionBp
+from .take_exam import take_exam
 from .view_exams import exam_viewBp
 
 app.register_blueprint(auth.authBp)
 app.register_blueprint(examBp)
-#app.register_blueprint(submissionBp)
+app.register_blueprint(take_exam.takeExamBp)
 app.register_blueprint(exam_viewBp)
-
-#ps. commented out submissionBp bc it was causing issues to run the project

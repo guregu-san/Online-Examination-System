@@ -1,121 +1,60 @@
 # Test Cases — Use Case 5 (Exam Taking)
 
-## Database Reset
-
-Before running tests, reset and initialize database:
-
+## Test Case 1 — Search for Exam (U5-F1)
 ```bash
-rm oesDB.db
-sqlite3 oesDB.db < sql_scripts/initializeDB.sql
-Insert test data:
-```
-```sql
-INSERT INTO instructors (name, email, password_hash)
-VALUES ('Teacher One', 'teacher@uni.com', 'pass');
-
-INSERT INTO courses (course_code, course_name, instructor_email)
-VALUES ('CS101', 'Example Course', 'teacher@uni.com');
-
-INSERT INTO students (roll_number, name, email, password_hash, contact_number)
-VALUES (1, 'Student One', 'student@uni.com', 'pass', 1234567890);
-
-INSERT INTO exams (course_code, instructor_email, title, time_limit, security_settings)
-VALUES ('CS101', 'teacher@uni.com', 'Midterm Exam', 60, 'shuffle=true');
-
-INSERT INTO questions (exam_id, question_text, is_multiple_correct, points, order_index)
-VALUES 
-    (1, 'What is 2+2?', 0, 5, 1),
-    (1, 'Select prime numbers', 1, 10, 2);
-
-
-INSERT INTO options (question_id, option_text, is_correct)
-VALUES 
-    (1, '3', 0),
-    (1, '4', 1),
-    (2, '2', 1),
-    (2, '3', 1),
-    (2, '4', 0);
+# Search for exam by ID (stores exam_id in session cookie)
+curl -X POST http://127.0.0.1:5001/take_exam \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d 'examID=1' \
+  -c cookies.txt
 ```
 
-## USE CASE 5 — EXAM TAKING TEST CASES
-### Test Case 1 — Start Exam Attempt (U5-F1)
+## Test Case 2 — View Exam Initialization
 ```bash
-
-curl -X POST http://127.0.0.1:5001/submissions/start \
-  -H "Content-Type: application/json" \
-  -d '{"exam_id": 1, "roll_number": 1}'
+# GET exam info before starting (requires session from Test Case 1)
+curl -X GET http://127.0.0.1:5001/take_exam/exam_initialization \
+  -b cookies.txt
 ```
 
-### Test Case 2 — Load Exam Content (U5-F2)
+## Test Case 3 — Start Exam and Load Questions
 ```bash
-
-curl http://127.0.0.1:5001/submissions/1
+# POST to start exam; returns submission form with questions (uses exam_id from session)
+curl -X POST http://127.0.0.1:5001/take_exam/start \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -b cookies.txt \
+  -d 'questions-0-question_id=1&questions-0-single_or_multi=single&questions-0-answer_single=11&questions-1-question_id=2&questions-1-single_or_multi=multi&questions-1-answer_multi=20&questions-1-answer_multi=21&csrf_token=<token>'
 ```
 
-### Test Case 3 — Save Student Answer (U5-F3)
-#### Example: student selects “4” for Q1.
+## Test Case 4 — Submit Exam with Single-Choice Answer
 ```bash
-curl -X POST http://127.0.0.1:5001/submissions/1/answer \
-  -H "Content-Type: application/json" \
-  -d '{
-        "question_id": 1,
-        "selected_options": [2]
-      }'
-```     
-
-### Test Case 4 — Save Answer for Multi-Select Question (U5-F3)
-```bash
-curl -X POST http://127.0.0.1:5001/submissions/1/answer \
-  -H "Content-Type: application/json" \
-  -d '{
-        "question_id": 2,
-        "selected_options": [3, 4]
-      }'
+# Submit answers: Q1 (single-choice) = option 11, Q2 (multi-choice) = options [20, 21]
+curl -X POST http://127.0.0.1:5001/take_exam/start \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -b cookies.txt \
+  -d 'roll_number=1&questions-0-question_id=1&questions-0-single_or_multi=single&questions-0-answer_single=11&questions-1-question_id=2&questions-1-single_or_multi=multi&questions-1-answer_multi=20&questions-1-answer_multi=21&csrf_token=<token>'
 ```
 
-### Test Case 5 — Submit Exam (U5-F4)
+## Test Case 5 — Invalid Exam Search (Negative Test)
 ```bash
-
-curl -X POST http://127.0.0.1:5001/submissions/1/submit
+# Searching for non-existent exam should show validation error
+curl -X POST http://127.0.0.1:5001/take_exam \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d 'examID=999' \
+  -c cookies.txt
 ```
 
-### Test Case 6 — Cannot Answer After Submit (Negative Test)
+## Test Case 6 — Missing Session for Initialization (Negative Test)
 ```bash
-curl -X POST http://127.0.0.1:5001/submissions/1/answer \
-  -H "Content-Type: application/json" \
-  -d '{"question_id": 1, "selected_options": [2]}'
+# Trying to access exam_initialization without session should redirect to exam search
+curl -X GET http://127.0.0.1:5001/take_exam/exam_initialization \
+  -c cookies.txt
 ```
 
-### Test Case 7 — Attempting Exam Twice (Negative Test)
+## Test Case 7 — Missing Session for Start (Negative Test)
 ```bash
-curl -X POST http://127.0.0.1:5001/submissions/start \
-  -H "Content-Type: application/json" \
-  -d '{"exam_id": 1, "roll_number": 1}'
-```
-
-### Test Case 8 — Load Results After Submission (U5-F5)
-```bash
-curl http://127.0.0.1:5001/submissions/1/result
-```
-
-### Test Case 9 — Invalid Question ID (Negative Test)
-```bash
-curl -X POST http://127.0.0.1:5001/submissions/1/answer \
-  -H "Content-Type: application/json" \
-  -d '{"question_id": 999, "selected_options": [1]}'
-```
-
-### Test Case 10 — Invalid Exam ID (Negative Test)
-```bash
-
-curl -X POST http://127.0.0.1:5001/submissions/start \
-  -H "Content-Type: application/json" \
-  -d '{"exam_id": 999, "roll_number": 1}'
-```
-
-### Test Case 11 — Invalid Student ID (Negative Test)
-```bash
-curl -X POST http://127.0.0.1:5001/submissions/start \
-  -H "Content-Type: application/json" \
-  -d '{"exam_id": 1, "roll_number": 999}'
+# Trying to start exam without session should redirect to exam search
+curl -X POST http://127.0.0.1:5001/take_exam/start \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d 'roll_number=1' \
+  -c cookies.txt
 ```

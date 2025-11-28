@@ -14,6 +14,12 @@
                 {{ form.email.label }}
                 {{ form.email(class="form-control") }}
             </div>
+
+            <div class="form-group">
+                {{ form.password.label }}
+                {{ form.password(class="form-control") }}
+            </div>
+
             {% if form.email.errors %}
                 <div class="text-danger">
                     {% for error in form.email.errors %}
@@ -21,10 +27,7 @@
                     {% endfor %}
                 </div>
             {% endif %}
-            <div class="form-group">
-                {{ form.password.label }}
-                {{ form.password(class="form-control") }}
-            </div>
+
             {% if form.password.errors %}
                 <div class="text-danger">
                     {% for error in form.password.errors %}

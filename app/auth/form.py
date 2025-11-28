@@ -7,19 +7,23 @@ from flask_bcrypt import Bcrypt
 
 bcrypt = Bcrypt(app)
 
+def raise_error():
+        raise ValidationError('password or email incorrect')
+
 class LoginForm(FlaskForm):
     email = StringField(validators=[InputRequired()], render_kw={"placeholder": "email"})
     password = PasswordField(validators=[InputRequired()], render_kw={"placeholder": "Password"})
 
     submit = SubmitField('Login')
 
+    
+
     def validate_email(self, email):
         user = Students.query.filter_by(email=email.data).first()
         if not user:
             user = Instructors.query.filter_by(email=email.data).first()
-        
         if not user:
-            raise ValidationError('Email not found.')
+            raise_error()
 
     def validate_password(self, password):
         user = Students.query.filter_by(email=self.email.data).first()
@@ -27,7 +31,11 @@ class LoginForm(FlaskForm):
             user = Instructors.query.filter_by(email=self.email.data).first()
         
         if user and not bcrypt.check_password_hash(user.password_hash, password.data):
-            raise ValidationError('Incorrect password.')
+            raise_error()
+        
+
+        
+    
 
 
 class RegisterForm(FlaskForm):

@@ -1,82 +1,90 @@
-:root{
-	--bg: #f6f8fa;
-	--card: #ffffff;
-	--text: #1f2937;
-	--muted: #6b7280;
-	--accent: #2563eb;
-	--radius: 8px;
-	--shadow: 0 6px 18px rgba(31,41,55,0.08);
+:root {
+  --bg: #f6f8fa;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --radius: 8px;
+  --shadow: 0 6px 18px rgba(31, 41, 55, 0.08);
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-	margin:0;
-	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-		Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial;
-	background: linear-gradient(180deg, var(--bg), #ffffff);
-	color:var(--text);
-	-webkit-font-smoothing:antialiased;
-	-moz-osx-font-smoothing:grayscale;
-	align-items:center;
-	justify-content:center;
+* {
+  box-sizing: border-box
 }
 
-.card{
-	background:var(--card);
-	border-radius:var(--radius);
-	box-shadow:var(--shadow);
-	padding:28px;
-	border:1px solid rgba(15,23,42,0.03);
-	max-width: 500px;
-	width: 100%;
-	text-align: center;
+html,
+body {
+  height: 100%
 }
 
-.radio-inline{
-	display:flex;
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial;
+  background: linear-gradient(180deg, var(--bg), #ffffff);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  border: 1px solid rgba(15, 23, 42, 0.03);
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+}
+
+.radio-inline {
+  display: flex;
 }
 
 .radio-item {
-    margin-right: 25px;
+  margin-right: 25px;
 }
 
 .card-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
 }
 
 @media (max-width: 768px) {
-    .card-container {
-        padding: 20px;
-    }
-    .card {
-        width: 100%;
-    }
+  .card-container {
+    padding: 20px;
+  }
+
+  .card {
+    width: 100%;
+  }
 }
 
 .card h1 {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .card p {
-    color: var(--muted);
-    margin-bottom: 20px;
+  color: var(--muted);
+  margin-bottom: 20px;
 }
 
 .card .btn {
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 .card .form-group {
-    margin-bottom: 20px;
-    text-align: left;
+  margin-bottom: 20px;
+  text-align: left;
 }
 
 .card .form-control {
-    width: 100%;
+  width: 100%;
 }
 
 /*
@@ -87,17 +95,20 @@ body{
 .sidebar {
   display: none;
 }
+
 @media (min-width: 768px) {
   .sidebar {
     position: fixed;
-    top: 51px; /* Height of navbar */
+    top: 51px;
+    /* Height of navbar */
     bottom: 0;
     left: 0;
     z-index: 1000;
     display: block;
     padding: 20px;
     overflow-x: hidden;
-    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    overflow-y: auto;
+    /* Scrollable contents if viewport is shorter than content. */
     background-color: #f5f5f5;
     border-right: 1px solid #eee;
   }
@@ -105,17 +116,20 @@ body{
 
 /* Sidebar navigation */
 .nav-sidebar {
-  margin-right: -21px; /* 20px padding + 1px border */
+  margin-right: -21px;
+  /* 20px padding + 1px border */
   margin-bottom: 20px;
   margin-left: -20px;
 }
-.nav-sidebar > li > a {
+
+.nav-sidebar>li>a {
   padding-right: 20px;
   padding-left: 20px;
 }
-.nav-sidebar > .active > a,
-.nav-sidebar > .active > a:hover,
-.nav-sidebar > .active > a:focus {
+
+.nav-sidebar>.active>a,
+.nav-sidebar>.active>a:hover,
+.nav-sidebar>.active>a:focus {
   color: #fff;
   background-color: #428bca;
 }
@@ -128,12 +142,71 @@ body{
 .main {
   padding: 20px;
 }
+
 @media (min-width: 768px) {
   .main {
     padding-right: 40px;
     padding-left: 40px;
   }
 }
+
 .main .page-header {
   margin-top: 0;
+}
+
+/* for view results pages */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 20px;
+}
+
+th,
+td {
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+th {
+  background: #eee;
+}
+
+a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.filter-box {
+  margin-bottom: 20px;
+}
+
+
+.question-box {
+  margin-bottom: 25px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.option {
+  margin-left: 25px;
+}
+
+.selected {
+  font-weight: bold;
+  color: #0066cc;
+}
+
+.correct {
+  color: green;
+}
+
+.not-graded {
+  color: darkred;
+  font-size: 18px;
 }

@@ -1,17 +1,11 @@
-<!DOCTYPE html> <!-- CHAT GENERATED SHIT-->
-<html>
-<head>
-    <title>Exam Result</title>
-    <style>
-        body { font-family: sans-serif; margin: 30px; }
-        .question-box { margin-bottom: 25px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; }
-        .option { margin-left: 25px; }
-        .selected { font-weight: bold; color: #0066cc; }
-        .correct { color: green; }
-        .not-graded { color: darkred; font-size: 18px; }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+{%block title%} Exam Result {%endblock%}
+
+
+{%block main_content%}
 
 {% if message %}
     <h2 class="not-graded">{{ message }}</h2>
@@ -48,5 +42,5 @@
 
 {% endif %}
 
-</body>
-</html>
+{%endblock%}
+

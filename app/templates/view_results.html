@@ -1,21 +1,11 @@
-<!DOCTYPE html> <!-- CHAT GENERATED TEMPLATE IM CURRENTLY BUILDING ON-->
-<html>
-<head>
-    <title>My Exam Results</title>
-    <style>
-        body { font-family: sans-serif; margin: 30px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { padding: 10px; border: 1px solid #ccc; }
-        th { background: #eee; }
-        a { color: #0066cc; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        .filter-box { margin-bottom: 20px; }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
-<!--BUTTON FOR GOING BACK TO DASHBOARD-->
-<a href="/dashboard?roll_number={{ roll_number }}">&#8592; Back to Dashboard</a>
+
+{%block title%} My Exam Results {%endblock%}
+
+
+{%block main_content%}
 
 <h2>Completed Exams</h2>
 
@@ -59,5 +49,4 @@
     {% endfor %}
 </table>
 
-</body>
-</html>
+{%endblock%}

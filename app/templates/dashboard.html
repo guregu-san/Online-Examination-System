@@ -6,9 +6,17 @@
 
 {%block main_content%}
     <div class="card-container">
-        <div class="card">
+        <div class="card text-center">
             <h1>Welcome, {{ user.name }}!</h1>
+            <br>
+            <h4>Your Information:</h4>
+            <p><strong>Name:</strong> {{ user.name }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
             <p>You are logged in as a {{ user.role }}.</p>
+            {% if user.role == 'Student' %}
+            <p><strong>Roll Number:</strong> {{ user.roll_number }}</p>
+            <p><strong>Contact Number:</strong> {{ user.contact_number }}</p>
+            {% endif %}
         </div>
     </div>
 {%endblock%}

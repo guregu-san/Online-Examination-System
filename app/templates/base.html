@@ -41,21 +41,22 @@
             <ul class="nav nav-sidebar">
                 <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
                 <li><a href="{{ url_for('takeExamBp.exam_search') }}">Take Exam</a></li>
-                <li><a href="{{ url_for('exam_view.list_results', roll_number=1) }}"> View results </a></li>
+                {% if current_user.role == 'Student' %}
+                    <li><a href="{{ url_for('exam_view.list_results', roll_number=1) }}"> View results </a></li>
+                {% endif %}
             </ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-        {% else %}
-        <div class="col-sm-12 main">
-        {% endif %}
-        
-        {% block main_content %}{% endblock %}
+            {% else %}
+            <div class="col-sm-12 main">
+                {% endif %}
+
+                {% block main_content %}{% endblock %}
+            </div>
         </div>
     </div>
-</div>
 
 
 
 
-{%endblock%}
-
+    {%endblock%}

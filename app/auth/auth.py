@@ -27,9 +27,10 @@ def load_user(user_id):
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = Students.query.filter_by(email=form.email.data).first()
+        email = form.email.data.lower()
+        user = Students.query.filter_by(email=email).first()
         if not user:
-            user = Instructors.query.filter_by(email=form.email.data).first()
+            user = Instructors.query.filter_by(email=email).first()
         
         if user:
             login_user(user)
@@ -45,13 +46,13 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('authBp.login'))
-
 @authBp.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        if Students.query.filter_by(email=form.email.data).first() or \
-           Instructors.query.filter_by(email=form.email.data).first():
+        email = form.email.data.lower()
+        if Students.query.filter_by(email=email).first() or \
+           Instructors.query.filter_by(email=email).first():
             flash('Email already registered.', 'danger')
             return render_template('register.html', form=form)
 
@@ -61,9 +62,10 @@ def register():
         user_data = {
             'role': role,
             'name': form.name.data,
-            'email': form.email.data,
+            'email': email,
             'password_hash': bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         }
+
 
         if role == 'Student':
             user_data['roll_number'] = form.roll_number.data
@@ -77,7 +79,6 @@ def register():
         return redirect(url_for('authBp.verification_sent'))
 
     return render_template('register.html', form=form)
-
 @authBp.route('/verify_email/<token>')
 def verify_email(token):
     data = confirm_verification_token(token)
@@ -85,9 +86,10 @@ def verify_email(token):
         flash('The confirmation link is invalid or has expired.', 'danger')
         return redirect(url_for('authBp.login'))
     
-    user = Students.query.filter_by(email=data['email']).first()
+    email = data['email'].lower()
+    user = Students.query.filter_by(email=email).first()
     if not user:
-        user = Instructors.query.filter_by(email=data['email']).first()
+        user = Instructors.query.filter_by(email=email).first()
     
     if user:
         flash('Account already verified. Please login.', 'success')
@@ -97,14 +99,14 @@ def verify_email(token):
         user = Students(
             roll_number=data['roll_number'],
             name=data['name'],
-            email=data['email'],
+            email=email,
             password_hash=data['password_hash'],
             contact_number=data['contact_number']
         )
     else:
         user = Instructors(
             name=data['name'],
-            email=data['email'],
+            email=email,
             password_hash=data['password_hash']
         )
     

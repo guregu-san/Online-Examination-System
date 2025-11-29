@@ -25,15 +25,16 @@ def send_verification_email(user_data):
     confirm_url = url_for('authBp.verify_email', token=token, _external=True)
     
     html = f"""
-    <p>Welcome! Thanks for signing up.</p>
-    <p>Please follow this link to activate your account:</p>
+    <p>Welcome to the Online Examination System (OES)!</p>
+    <p>Thanks for signing up. Please follow this link to activate your OES account:</p>
     <p><a href="{confirm_url}">{confirm_url}</a></p>
     <br>
-    <p>Cheers!</p>
+    <p>If you did not register for this account, please ignore this email.</p>
+    <p>Best regards,<br>The OES Team</p>
     """
     
     msg = Message(
-        subject="Please verify your email",
+        subject="Verify your OES Account",
         sender=("OES Verification", "hello@demomailtrap.co"),
         recipients=[user_data['email']],
         html=html

@@ -8,37 +8,39 @@ from flask_bcrypt import Bcrypt
 bcrypt = Bcrypt(app)
 
 class LoginForm(FlaskForm):
-    email = StringField(validators=[InputRequired()], render_kw={"placeholder": "email"})
+    email = StringField(validators=[InputRequired()], render_kw={"placeholder": "email"}, filters=[lambda x: x.strip() if x else None])
     password = PasswordField(validators=[InputRequired()], render_kw={"placeholder": "Password"})
 
     submit = SubmitField('Login')
 
 
     def validate_email(self, email):
-        user = Students.query.filter_by(email=email.data).first()
+        email_data = email.data.lower()
+        user = Students.query.filter_by(email=email_data).first()
         if not user:
-            user = Instructors.query.filter_by(email=email.data).first()
+            user = Instructors.query.filter_by(email=email_data).first()
         
         if not user:
             raise ValidationError('password or email incorrect')
 
 
     def validate_password(self, password):
-        user = Students.query.filter_by(email=self.email.data).first()
+        email_data = self.email.data.lower()
+        user = Students.query.filter_by(email=email_data).first()
         if not user:
-            user = Instructors.query.filter_by(email=self.email.data).first()
+            user = Instructors.query.filter_by(email=email_data).first()
         
         if user and not bcrypt.check_password_hash(user.password_hash, password.data):
             raise ValidationError('password or email incorrect')
 
 
 class RegisterForm(FlaskForm):
-    email = StringField(render_kw={"placeholder": "email"})
+    email = StringField(render_kw={"placeholder": "email"}, filters=[lambda x: x.strip() if x else None])
     password = PasswordField(render_kw={"placeholder": "Password"})
     role = RadioField('Role', choices=[('Student'), ('Instructor')], default='Student')
-    roll_number = StringField(render_kw={"placeholder": "Roll Number"})
-    name = StringField(render_kw={"placeholder": "Name"})
-    contact_number = StringField(render_kw={"placeholder": "Contact Number"})
+    roll_number = StringField(render_kw={"placeholder": "Roll Number"}, filters=[lambda x: x.strip() if x else None])
+    name = StringField(render_kw={"placeholder": "Name"}, filters=[lambda x: x.strip() if x else None])
+    contact_number = StringField(render_kw={"placeholder": "Contact Number"}, filters=[lambda x: x.strip() if x else None])
     
     submit = SubmitField('Register')
 
@@ -48,11 +50,12 @@ class RegisterForm(FlaskForm):
         if len(email.data) < 4 or len(email.data) > 50:
             raise ValidationError("Email must be between 4 and 50 characters.")
 
+        email_data = email.data.lower()
         role = self.role.data or 'student'
         if role == 'student':
-            existing_user_email = Students.query.filter_by(email=email.data).first()
+            existing_user_email = Students.query.filter_by(email=email_data).first()
         else:
-            existing_user_email = Instructors.query.filter_by(email=email.data).first()
+            existing_user_email = Instructors.query.filter_by(email=email_data).first()
         
         if existing_user_email:
             raise ValidationError("That email address is already in use. Please choose a different one.")

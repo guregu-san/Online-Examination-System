@@ -19,7 +19,7 @@ python -m pip install --upgrade pip setuptools wheel
 ### 4) install the packages
 Packages:
 ```
-pip install flask flask_sqlalchemy flask_login flask_bcrypt flask_wtf wtforms email_validator Flask-Bootstrap
+pip install flask flask_sqlalchemy flask_login flask_bcrypt flask_wtf wtforms email_validator Flask-Bootstrap flask_mail mailtrap Flask-Mail
 ```
 
 ### 5) quick verification (optional)
@@ -32,5 +32,5 @@ python -c "import flask, flask_sqlalchemy, flask_login; print('flask', flask.__v
 python3 run.py
 ```
 
-alesy note:
+aleksy note:
 all user hashed passwords is "dupa12345"

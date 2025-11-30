@@ -139,22 +139,28 @@ def start():
 
     # Populate the dynamic form with questions
     for i, q in enumerate(questions_with_options):
+
+        # Append new question subform if needed
         if i >= len(form.questions):
-            # append new question subform if needed
             form.questions.append_entry()
         
         subform = form.questions[i]
-        subform.question_id.data = str(q['question_id'])
-        subform.single_or_multi.data = 'multi' if q['is_multiple_correct'] else 'single'
-        
-        # Populate choices
+        subform.question_id.data = q['question_id']
         choices = [(int(opt['option_id']), opt['option_text']) for opt in q['options']]
-        subform.answer_single.choices = choices
-        subform.answer_multi.choices = choices
+        
+        if q['is_multiple_correct']:
+            subform.single_or_multi.data = 'multi'
+            subform.answer_multi.choices = choices
+        else:
+            subform.single_or_multi.data = 'single'
+            subform.answer_single.choices = choices
+
+        print ("Added question", q['question_id'], "with choices", choices)
     
     if form.validate_on_submit():
         # Collect answers
         answers = {}
+        print ("Submission validated")
         for subform in form.questions:
             qid = subform.question_id.data
 
@@ -163,6 +169,7 @@ def start():
             else:
                 answers[qid] = subform.answer_single.data
         
+        print("Collected answers:", answers)
         # TODO: calculate score and store submission in DB
         return jsonify(message="Exam submitted", answers=answers), 200
     

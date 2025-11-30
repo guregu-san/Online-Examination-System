@@ -1,6 +1,7 @@
 import sqlite3
 import json
 from flask import Blueprint, request, jsonify, render_template
+from flask_login import current_user
 #from app import app
 
 
@@ -22,19 +23,28 @@ exam_viewBp = Blueprint('exam_view', __name__, template_folder='templates')
 # U6-F1: List completed exams (results) for a student
 @exam_viewBp.route('/results', methods=['GET'])
 def list_results():
-    # TODO: fetch roll_number from session/login later!!!!!!
+    # Prefer current user when available:
+    # - Students should only see their own results (use current_user.roll_number)
+    # - Instructors will see results for exams they own (filtered by instructor_email) when not providing a roll_number
     roll_number = request.args.get('roll_number')
     course_code = request.args.get('course_code')
     instructor_name = request.args.get('instructor')
 
-    if not roll_number:
-        # temporary error message – in practice, user should be logged in
+    # If a logged-in student is requesting results, always use their roll_number
+    if current_user.is_authenticated and getattr(current_user, "role", None) == "Student":
+        roll_number = getattr(current_user, "roll_number", roll_number)
+
+    # If not a logged-in instructor and no roll_number available, require it
+    if not roll_number and not (
+        current_user.is_authenticated and getattr(current_user, "role", None) == "Instructor"
+    ):
         return "roll_number query parameter is required for now", 400
 
     conn = get_db()
     cur = conn.cursor()
 
-    query = """
+    # Build SQL based on whether the current user is an instructor or we have a roll_number
+    base_select = """
         SELECT
             s.submission_id,
             s.exam_id,
@@ -51,10 +61,18 @@ def list_results():
         JOIN exams e ON e.exam_id = s.exam_id
         JOIN courses c ON c.course_code = e.course_code
         JOIN instructors i ON i.email = e.instructor_email
-        WHERE s.roll_number = ?
-          AND s.status IN ('SUBMITTED', 'GRADED')
     """
-    params = [roll_number]
+
+    params = []
+
+    # If the user is an instructor and no roll_number was supplied, return submissions for exams they own
+    if current_user.is_authenticated and getattr(current_user, "role", None) == "Instructor" and not roll_number:
+        query = base_select + " WHERE e.instructor_email = ? AND s.status IN ('SUBMITTED', 'GRADED')"
+        params = [current_user.email]
+    else:
+        # For students or when roll_number is supplied, show only that student's results
+        query = base_select + " WHERE s.roll_number = ? AND s.status IN ('SUBMITTED', 'GRADED')"
+        params = [roll_number]
 
     if course_code:
         query += " AND e.course_code LIKE ?"
